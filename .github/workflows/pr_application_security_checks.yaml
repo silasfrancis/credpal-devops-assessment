@@ -20,6 +20,8 @@ jobs:
       with:
           projectBaseDir: app
           args: >
+            -Dsonar.projectKey=silasfrancis_credpal_devops_assessment
+            -Dsonar.organization=silasfrancis
             -Dsonar.exclusions=test/**
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
