@@ -6,7 +6,8 @@ const app = express();
 app.use(express.json());
 
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  const { pathname } = new URL(req.url, `http://localhost`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${pathname}`);
   next();
 });
 
@@ -50,15 +51,15 @@ app.get("/status", async (req, res) => {
     hostname: os.hostname(),
     timestamp: new Date()
   };
-  console.log("Status requested:", statusData);
+  console.log("Status requested");
   res.json(statusData);
 });
 
 app.post("/process", async (req, res) => {
   await logRequest("/process");
-  const payload = req.body;
-  console.log("Processing payload:", payload);
+  console.log("Processing payload");
   try {
+    const payload = req.body;
     res.json({ message: "Processed successfully", data: payload });
     console.log("Payload processed successfully");
   } catch (err) {
@@ -80,7 +81,7 @@ app.get("/logs", async (req, res) => {
 });
 
 app.use((req, res) => {
-  console.warn(`404 - Route not found: ${req.method} ${req.url}`);
+  console.warn(`404 - Route not found: ${req.method}`);
   res.status(404).json({
     error: "Route not found",
     availableEndpoints: [
@@ -99,7 +100,6 @@ if (process.env.NODE_ENV !== "test") {
       app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
         console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-        console.log(`DB Host: ${process.env.DB_HOST}`);
       });
     })
     .catch(err => {
