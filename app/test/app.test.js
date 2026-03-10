@@ -1,5 +1,10 @@
 const request = require("supertest");
-const app = require("../index"); 
+const app = require("../index");
+
+jest.mock("../db", () => ({
+  pool: { query: jest.fn().mockResolvedValue({ rows: [] }) },
+  init: jest.fn().mockResolvedValue()
+}));
 
 describe("Basic Node.js Endpoints", () => {
 
