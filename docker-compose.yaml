@@ -1,0 +1,44 @@
+services:
+  postgres:
+    container_name: postgress_db
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    container_name: nodejs_app
+    build: app
+    environment:
+      DB_HOST: postgres
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres_data:
