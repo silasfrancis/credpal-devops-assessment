@@ -1,13 +1,12 @@
-FROM node:24-alpine3.23 AS builder
+FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
-COPY package.json package-lock.json* ./
+COPY package*.json ./
 RUN npm ci --omit=dev
 COPY . .
 
-FROM node:24-alpine3.23
+FROM gcr.io/distroless/nodejs22-debian13
 
-RUN addgroup -S nodejs_app && adduser -S appuser -G nodejs_app
 WORKDIR /app
 
 COPY --from=builder /app/node_modules ./node_modules
@@ -15,7 +14,7 @@ COPY --from=builder /app/index.js ./
 COPY --from=builder /app/db.js ./
 COPY --from=builder /app/package.json ./
 
-RUN chown -R appuser:nodejs_app /app
-USER appuser
+USER nonroot
 EXPOSE 3000
-CMD ["node", "index.js"]
+
+CMD ["index.js"]
