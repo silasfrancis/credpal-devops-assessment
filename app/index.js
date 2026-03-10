@@ -6,8 +6,9 @@ const app = express();
 app.use(express.json());
 
 app.use((req, res, next) => {
-  const { pathname } = new URL(req.url, `http://localhost`);
-  console.log(`[${new Date().toISOString()}] ${req.method} ${pathname}`);
+  const timestamp = new Date().toISOString();
+  const method = req.method; 
+  console.log(`[${timestamp}] ${method} request received`);
   next();
 });
 
