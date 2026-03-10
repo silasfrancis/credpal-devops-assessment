@@ -5,14 +5,14 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 COPY . .
 
-FROM gcr.io/distroless/nodejs22-debian13
+FROM gcr.io/distroless/nodejs22-debian12
 
 WORKDIR /app
 
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/index.js ./
-COPY --from=builder /app/db.js ./
-COPY --from=builder /app/package.json ./
+COPY --from=builder --chown=nonroot:nonroot /app/node_modules ./node_modules
+COPY --from=builder --chown=nonroot:nonroot /app/index.js ./
+COPY --from=builder --chown=nonroot:nonroot /app/db.js ./
+COPY --from=builder --chown=nonroot:nonroot /app/package.json ./
 
 USER nonroot
 EXPOSE 3000
