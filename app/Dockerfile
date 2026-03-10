@@ -1,11 +1,11 @@
-FROM node:20-alpine AS builder
+FROM node:22.14-alpine3.23 AS builder
 
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 COPY . .
 
-FROM node:20-alpine
+FROM node:22.14-alpine3.23
 
 RUN addgroup -S nodejs_app && adduser -S appuser -G nodejs_app
 WORKDIR /app
