@@ -1,0 +1,6 @@
+version: "3"
+
+tasks:
+
+  fetch_image_repo:
+    cmd: echo "silasfrancis/credpal-assessment-nodejs-app" 

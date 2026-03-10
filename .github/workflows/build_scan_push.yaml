@@ -1,0 +1,105 @@
+name: Build, Scan and Push Images to Docker Hub
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  filter-updated-directories:
+    runs-on: ubuntu-24.04
+    outputs:
+        app_changed: ${{ steps.filter_files.outputs.app }}
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 
+
+        - name: Filter changed files
+          id: filter_files
+          uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+          with:
+                filters: |
+                  app:
+                    - 'app/**'
+
+  build-and-push:
+    runs-on: ubuntu-24.04
+    needs: filter-updated-directories
+    permissions:
+      id-token: write
+      contents: read
+    if: ${{ needs.filter-updated-directories.outputs.app_changed == 'true' }}
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+
+        - name: Install task
+          uses:  ./.github/actions/install_task
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708
+          with:
+            role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
+            aws-region: us-east-2
+
+        - name: Load AWS Docker Credentials from Secrets Manager
+          env:
+            SECRET_ID: cloud_credentials
+          run: |
+            SECRET=$(aws secretsmanager get-secret-value \
+              --secret-id $SECRET_ID \
+              --query SecretString \
+              --output text)
+
+            echo "DOCKERHUB_USERNAME=$(echo $SECRET | jq -r .DOCKERHUB_USERNAME)" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=$(echo $SECRET | jq -r .DOCKERHUB_TOKEN)" >> $GITHUB_ENV
+
+        - name: Auth to Docker Hub
+          uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+          with:
+              username: ${{ env.DOCKERHUB_USERNAME }}
+              password: ${{ env.DOCKERHUB_TOKEN }}
+        
+        - name: Set up QEMU
+          uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
+
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+        
+        - name: Get image repo
+          id: image_repo
+          run: |
+            IMAGE_REPO=$(task -t .github/workflows/utils/Taskfile.yaml fetch_image_repo | tail -n 1)
+            echo "IMAGE_REPO=$IMAGE_REPO" >> $GITHUB_OUTPUT
+
+        - name: Compute image tag
+          id: image_version
+          run: |
+            TAG=$(git tag --points-at HEAD | head -n 1)
+            if [ -n "$TAG" ]; then
+                echo "IMAGE_VERSION=$TAG" >> $GITHUB_OUTPUT
+            else
+                echo "IMAGE_VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+            fi
+
+        - name: Build image
+          uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+          with:
+            context: app
+            push: false
+            load: true
+            tags: '${{ steps.image_repo.outputs.IMAGE_REPO }}:${{ steps.image_version.outputs.IMAGE_VERSION }}'
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
+            
+        - name: Run Trivy vulnerability scanner
+          uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+          with:
+            image-ref: '${{ steps.image_repo.outputs.IMAGE_REPO }}:${{ steps.image_version.outputs.IMAGE_VERSION }}'
+            format: 'table'
+            exit-code: '1'
+            ignore-unfixed: true
+            vuln-type: 'os,library'
+            severity: 'CRITICAL,HIGH'
+
+        - name: Push image
+          run: docker push ${{ steps.image_repo.outputs.IMAGE_REPO }}:${{ steps.image_version.outputs.IMAGE_VERSION }}
