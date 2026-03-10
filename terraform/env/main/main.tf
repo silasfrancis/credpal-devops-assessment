@@ -51,7 +51,16 @@ module "ec2" {
 }
 
 module "acm_cert" {
-    source = "../../aws_modules/acm_cert"
+  source = "../../aws_modules/acm_cert"
+}
+
+module "s3_alb_logs"{
+  source = "../../aws_modules/s3_alb_logs"
+
+  bucket_name = "${local.tag}-silas-${local.environment}"
+  bucket_prefix = "alb-logs"
+  bucket_rule_id = "${local.tag}${local.environment}"
+  bucket_exp_days = 60
 }
 
 module "elb" {
@@ -66,10 +75,12 @@ module "elb" {
   vpc_id = module.vpc.vpc_id
   ec2_instance_id = module.ec2.ec2_instance_id
   certificate_arn = module.acm_cert.certificate_arn
+  alb_log_bucket_id = module.s3_alb_logs.alb_log_bucket
+  alb_log_bucket_prefix = "alb-logs"
 }
 
-module "s3" {
-  source = "../../aws_modules/s3"
+module "s3_tf_state" {
+  source = "../../aws_modules/s3_tf_state"
   
   bucket_name = "${local.tag}-silas-${local.environment}"
   bucket_key = "${local.environment}/terraform.tfstate"

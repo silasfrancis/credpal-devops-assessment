@@ -52,8 +52,8 @@ module "acm_cert_validation" {
   validation_records = [module.dns_validation.validation_record_fqdns]
 }
 
-module "s3" {
-  source = "../../aws_modules/s3"
+module "s3_tf_state" {
+  source = "../../aws_modules/s3_tf_state"
   
   bucket_name = "${local.tag}-silas-${local.environment}"
   bucket_key = "${local.environment}/terraform.tfstate"

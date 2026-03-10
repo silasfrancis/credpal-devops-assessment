@@ -21,3 +21,11 @@ variable "ec2_instance_id" {
 variable "certificate_arn" {
   type = string
 }
+
+variable "alb_log_bucket_id" {
+  type = string
+}
+
+variable "alb_log_bucket_prefix" {
+  type = string
+}

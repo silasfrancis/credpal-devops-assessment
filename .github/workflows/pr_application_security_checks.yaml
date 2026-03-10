@@ -1,0 +1,57 @@
+name: Application Security Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sonarqube:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 
+      with:
+        fetch-depth: 0
+
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9
+      with:
+          projectBaseDir: app
+          args: >
+            -Dsonar.exclusions=test/**
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  snyk_dependency_security_checks:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 
+
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      with:
+        args: --all-projects
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  chekov-scan:
+    runs-on: ubuntu-24.04
+    if: |
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+    permissions:
+        contents: write
+        id-token: write
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.1
+
+        - name: Run Checkov
+          uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf
+          with:
+            directory: policies/checkov
+            framework: terraform
+            config_file: .checkov.yaml
+            quiet: false
+            output_format: 'cli'
