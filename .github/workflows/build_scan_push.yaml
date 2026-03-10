@@ -94,8 +94,8 @@ jobs:
             push: false
             load: true
             tags: |
-              '${{ steps.image_repo.outputs.IMAGE_REPO }}:${{ steps.image_version.outputs.IMAGE_VERSION }}'
-              '${{ steps.image_repo.outputs.IMAGE_REPO }}:latest'
+                  ${{ steps.image_repo.outputs.IMAGE_REPO }}:${{ steps.image_version.outputs.IMAGE_VERSION }}
+                  ${{ steps.image_repo.outputs.IMAGE_REPO }}:latest
             cache-from: type=gha
             cache-to: type=gha,mode=max
             
