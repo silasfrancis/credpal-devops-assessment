@@ -50,8 +50,14 @@ jobs:
               --query SecretString \
               --output text)
 
-            echo "DOCKERHUB_USERNAME=$(echo $SECRET | jq -r .DOCKERHUB_USERNAME)" >> $GITHUB_ENV
-            echo "DOCKERHUB_TOKEN=$(echo $SECRET | jq -r .DOCKERHUB_TOKEN)" >> $GITHUB_ENV
+            DOCKERHUB_USERNAME=$(echo $SECRET | jq -r .DOCKERHUB_USERNAME)
+            DOCKERHUB_TOKEN=$(echo $SECRET | jq -r .DOCKERHUB_TOKEN)
+
+            echo "::add-mask::$DOCKERHUB_USERNAME"
+            echo "::add-mask::$DOCKERHUB_TOKEN"
+
+            echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=$DOCKERHUB_TOKEN" >> $GITHUB_ENV
 
         - name: Auth to Docker Hub
           uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
@@ -100,6 +106,7 @@ jobs:
             ignore-unfixed: true
             vuln-type: 'os,library'
             severity: 'CRITICAL,HIGH'
+            github-pat: ${{ github.token }}
 
         - name: Push image
           run: docker push ${{ steps.image_repo.outputs.IMAGE_REPO }}:${{ steps.image_version.outputs.IMAGE_VERSION }}
