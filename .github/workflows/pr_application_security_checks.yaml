@@ -29,29 +29,37 @@ jobs:
       uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 
 
     - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/node@master
+      uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
       with:
         args: --all-projects
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-  chekov-scan:
+  terraform-checks:
     runs-on: ubuntu-24.04
-    if: |
-      github.event_name != 'workflow_run' ||
-      github.event.workflow_run.conclusion == 'success'
-    permissions:
-        contents: write
-        id-token: write
     steps:
-        - name: Checkout code
-          uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 #v6.0.1
+    - name: Checkout code
+      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 
 
-        - name: Run Checkov
-          uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf
-          with:
-            directory: policies/checkov
-            framework: terraform
-            config_file: .checkov.yaml
-            quiet: false
-            output_format: 'cli'
+    - name: Setup tflint
+      uses: terraform-linters/setup-tflint@4cb9feea73331a35b422df102992a03a44a3bb33
+      with:
+        tflint_version: v0.52.0
+        cache: true
+
+    - name: Init tflint
+      run: tflint --init
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Run tflint
+      run: tflint --chdir=terraform/ -f compact
+
+    - name: Run Checkov
+      uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf
+      with:
+        directory: terraform
+        framework: terraform
+        config_file: policies/checkov/config.yaml
+        quiet: false
+        output_format: 'cli'
