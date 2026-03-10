@@ -19,16 +19,15 @@ resource "aws_iam_role" "ec2_role" {
 }
 
 resource "aws_iam_policy" "secrets_policy" {
-  name = "secrets-manager-read"
+  name        = "secrets-manager-read"
+  description = "Allows reading of a specific secret"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
-      Action = [
-        "secretsmanager:GetSecretValue"
-      ]
-      Resource = "arn:aws:secretsmanager:*:*:secret:basic_secrets*"
+      Effect   = "Allow"
+      Action   = ["secretsmanager:GetSecretValue"]
+      Resource = "arn:aws:secretsmanager:*:*:secret:${var.secret_name}*"
     }]
   })
 }
