@@ -108,4 +108,6 @@ jobs:
             severity: 'CRITICAL,HIGH'
 
         - name: Push image
-          run: docker push ${{ steps.image_repo.outputs.IMAGE_REPO }}:${{ steps.image_version.outputs.IMAGE_VERSION }}
+          run: |
+            docker push ${{ steps.image_repo.outputs.IMAGE_REPO }}:${{ steps.image_version.outputs.IMAGE_VERSION }}
+            docker push ${{ steps.image_repo.outputs.IMAGE_REPO }}:latest

@@ -19,7 +19,7 @@ services:
 
   app:
     container_name: nodejs_app
-    build: app
+    image: silasfrancis/credpal-assessment-nodejs-app
     environment:
       DB_HOST: postgres
       DB_USER: ${POSTGRES_USER}
