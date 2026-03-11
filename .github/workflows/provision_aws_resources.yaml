@@ -3,7 +3,7 @@ name: Provision AWS Resources with Terraform
 on:
     workflow_run:
         branches: [ main ]
-        workflows: ["Build, Scan and Push Docker Image"]
+        workflows: ["Build, Scan and Push Images to Docker Hub"]
         types: [ completed ]
 
 jobs:
