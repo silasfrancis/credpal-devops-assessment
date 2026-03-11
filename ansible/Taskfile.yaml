@@ -18,5 +18,5 @@ tasks:
   
   ansible_docker:
     cmds:
-      - ansible-playbook -i inventory.yaml docker.yaml
-    desc: Set up Docker on application instances
+      - ansible-playbook -i inventory.yaml bootstrap.yaml
+    desc: Set up instance to run docker and copy neccessary files
