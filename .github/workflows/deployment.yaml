@@ -7,9 +7,29 @@ on:
         types: [ completed ]
 
 jobs:
-  deploy:
+  check-build-status:
     runs-on: ubuntu-24.04
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Check if build job ran
+        run: |
+          BUILD_JOB_STATUS=$(gh run view ${{ github.event.workflow_run.id }} \
+            --repo ${{ github.repository }} \
+            --json jobs \
+            --jq '.jobs[] | select(.name=="build-and-push") | .conclusion')
+          
+          echo "Build job status: $BUILD_JOB_STATUS"
+          
+          if [ "$BUILD_JOB_STATUS" != "success" ]; then
+            echo "Build job was skipped or failed, aborting deployment!"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  deploy:
+    runs-on: ubuntu-24.04
+    needs: check-build-status
     permissions:
       id-token: write
       contents: read
