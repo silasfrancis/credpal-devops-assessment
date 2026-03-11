@@ -51,9 +51,3 @@
     owner: ubuntu
     group: ubuntu
     mode: '0755'
-
-- name: Ensure SSM agent is running
-  systemd:
-    name: amazon-ssm-agent
-    state: started
-    enabled: yes

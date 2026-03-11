@@ -16,7 +16,7 @@ tasks:
       - ansible all -i inventory.yaml -m ping
     desc: Test Ansible connectivity to host
   
-  ansible_docker:
+  bootstrap_ec2_instance:
     cmds:
       - ansible-playbook -i inventory.yaml bootstrap.yaml
     desc: Set up instance to run docker and copy neccessary files
