@@ -15,10 +15,12 @@ jobs:
         run: |
           SHA=${{ github.event.workflow_run.head_sha }}
           TERRAFORM_STATUS=$(gh run list \
+            --repo ${{ github.repository }} \
             --workflow "Provision AWS Resources with Terraform" \
             --json headSha,conclusion \
             --jq ".[] | select(.headSha==\"$SHA\") | .conclusion" | head -n1)
           DOCKER_STATUS=$(gh run list \
+            --repo ${{ github.repository }} \
             --workflow "Build, Scan and Push Images to Docker Hub" \
             --json headSha,conclusion \
             --jq ".[] | select(.headSha==\"$SHA\") | .conclusion" | head -n1)
