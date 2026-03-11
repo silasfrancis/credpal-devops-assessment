@@ -1,12 +1,12 @@
 terraform {
-#     backend "s3" {
-#     bucket = "silas-main-silas-main"
-#     key = "main/terraform.tfstate"
-#     region = "us-east-2"
-#     use_lockfile = true
-#     encrypt = true
+    backend "s3" {
+    bucket = "silas-main-silas-main"
+    key = "main/terraform.tfstate"
+    region = "us-east-2"
+    use_lockfile = true
+    encrypt = true
     
-#   }
+  }
 
   required_providers {
     aws = {
@@ -46,7 +46,7 @@ module "ec2" {
   instance_type = "t3.small"
   vpc_id = module.vpc.vpc_id
   private_subnet_id = module.vpc.subnets["private_subnet"]
-  ec2_security_group_id = module.vpc.security_group["ec2"]
+  ec2_security_group_id = [module.vpc.security_group["ec2"]]
   iam_instance_profile = module.iam.iam_instance_profile
 }
 

@@ -1,0 +1,62 @@
+name: Provision AWS Resources with Terraform
+
+on:
+    workflow_run:
+        branches: [ main ]
+        workflows: ["Build, Scan and Push Docker Image"]
+        types: [ completed ]
+
+jobs:
+  filter-updated-directories:
+    runs-on: ubuntu-24.04
+    outputs:
+        tf_dir_changed: ${{ steps.filter_files.outputs.terraform }}
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 
+
+        - name: Filter changed files
+          id: filter_files
+          uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+          with:
+                filters: |
+                  terraform:
+                    - 'terraform/aws_modules/**'
+                    - 'terraform/env/main/**'
+    
+  terraform:
+    runs-on: ubuntu-24.04
+    needs: filter-updated-directories
+    if: ${{ needs.filter-updated-directories.outputs.tf_dir_changed == 'true' }}
+    permissions:
+      id-token: write
+      contents: read
+    steps: 
+        - name: Checkout code
+          uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 
+
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+          with:
+            terraform_version: "1.11.0"
+            terraform_wrapper: false
+
+        - name: Terraform Format
+          run: terraform fmt -check
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708
+          with:
+            role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
+            aws-region: us-east-2
+            
+        - name: Terraform Plan
+          working-directory: terraform/env/main
+          run: |
+            terraform init
+            terraform plan -out=tfplan
+
+        - name: Terraform Apply
+          working-directory: terraform/env/main
+          run: |
+            terraform apply -auto-approve tfplan

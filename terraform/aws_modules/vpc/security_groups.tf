@@ -1,5 +1,4 @@
 resource "aws_default_security_group" "default" {
-  description = "Default security group with restricted access"
   vpc_id = aws_vpc.main_vpc.id
   tags = {
     Name = "default-restricted"
