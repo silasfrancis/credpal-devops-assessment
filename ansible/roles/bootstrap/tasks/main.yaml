@@ -19,6 +19,39 @@
 - name: Install the Docker packages
   shell:  apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+- name: Install required packages
+  package:
+    name:
+      - unzip
+      - curl
+    state: present
+
+- name: Download AWS CLI v2
+  get_url:
+    url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+    dest: /tmp/awscliv2.zip
+    mode: '0644'
+
+- name: Unzip AWS CLI installer
+  unarchive:
+    src: /tmp/awscliv2.zip
+    dest: /tmp/
+    remote_src: yes
+
+- name: Install AWS CLI
+  command: /tmp/aws/install
+  args:
+    creates: /usr/local/bin/aws
+
+- name: Verify AWS CLI installation
+  command: aws --version
+  register: aws_version
+  changed_when: false
+
+- name: Display AWS CLI version
+  debug:
+    msg: "{{ aws_version.stdout }}"
+
 - name: Create app directories
   file:
     path: "{{ item }}"
@@ -51,3 +84,28 @@
     owner: ubuntu
     group: ubuntu
     mode: '0755'
+
+- name: Get DB secrets from AWS
+  shell: aws secretsmanager get-secret-value --secret-id {{ aws_secret_id }} --query SecretString --output text
+  register: db_secret
+
+- name: Parse DB secrets
+  set_fact:
+    db_secrets: "{{ db_secret.stdout | from_json }}"
+
+- name: Run docker compose for postgres and blue app
+  command: docker compose up -d postgres app_blue
+  args:
+    chdir: /app
+  environment:
+    POSTGRES_USER: "{{ db_secrets.POSTGRES_USER }}"
+    POSTGRES_PASSWORD: "{{ db_secrets.POSTGRES_PASSWORD }}"
+    POSTGRES_DB: "{{ db_secrets.POSTGRES_DB }}"
+
+
+- name: Wait for API to be up
+  command: curl -sf http://127.0.0.1:3000/health
+  register: api_check
+  retries: 10
+  delay: 5
+  until: api_check.rc == 0
