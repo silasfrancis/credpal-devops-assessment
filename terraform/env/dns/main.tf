@@ -1,12 +1,12 @@
 terraform {
-#     backend "s3" {
-#     bucket = "silas-dns-silas-dns"
-#     key = "dns/terraform.tfstate"
-#     region = "us-east-2"
-#     use_lockfile = true
-#     encrypt = true
+    backend "s3" {
+    bucket = "silas-dns-silas-dns"
+    key = "dns/terraform.tfstate"
+    region = "us-east-2"
+    use_lockfile = true
+    encrypt = true
     
-#   }
+  }
 
   required_providers {
     aws = {
@@ -26,6 +26,7 @@ provider "aws" {
 }
 
 provider "cloudflare" {
+  api_token = var.cloudflare_api_token
 }
 
 locals {
@@ -33,6 +34,13 @@ locals {
   tag = "silas-dns"
 }
 
+variable "cloudflare_zone_id" {
+  type = string
+}
+
+variable "cloudflare_api_token" {
+  type = string
+}
 
 module "acm_cert_request" {
     source = "../../aws_modules/acm_cert_request"
@@ -49,7 +57,7 @@ module "acm_cert_validation" {
   source = "../../aws_modules/acm_cert_validation"
 
   certificate_arn = module.acm_cert_request.certificate_arn
-  validation_records = [module.dns_validation.validation_record_fqdns]
+  validation_records = module.dns_validation.validation_fqdns
 }
 
 module "s3_tf_state" {

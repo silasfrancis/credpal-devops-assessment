@@ -10,6 +10,6 @@ resource "aws_s3_bucket" "tf_state_bucket" {
 }
 
 resource "aws_s3_object" "s3_object" {
-  bucket = var.bucket_name
+  bucket = aws_s3_bucket.tf_state_bucket.id
   key = var.bucket_key
 }
