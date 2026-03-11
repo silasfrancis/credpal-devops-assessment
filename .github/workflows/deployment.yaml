@@ -1,40 +1,15 @@
 name: Deploy Application on EC2
 
 on:
-  workflow_run:
-    branches: [main]
-    workflows: ["Provision AWS Resources with Terraform"]
-    types: [completed]
+    workflow_run:
+        branches: [ main ]
+        workflows: ["Build, Scan and Push Images to Docker Hub"]
+        types: [ completed ]
 
 jobs:
-  check-previous-workflows-status:
-    runs-on: ubuntu-24.04
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    steps:
-      - name: Check both upstream workflows succeeded
-        run: |
-          SHA=${{ github.event.workflow_run.head_sha }}
-          TERRAFORM_STATUS=$(gh run list \
-            --repo ${{ github.repository }} \
-            --workflow "Provision AWS Resources with Terraform" \
-            --json headSha,conclusion \
-            --jq ".[] | select(.headSha==\"$SHA\") | .conclusion" | head -n1)
-          DOCKER_STATUS=$(gh run list \
-            --repo ${{ github.repository }} \
-            --workflow "Build, Scan and Push Images to Docker Hub" \
-            --json headSha,conclusion \
-            --jq ".[] | select(.headSha==\"$SHA\") | .conclusion" | head -n1)
-          echo "Terraform: $TERRAFORM_STATUS | Docker: $DOCKER_STATUS"
-          if [ "$TERRAFORM_STATUS" != "success" ] || [ "$DOCKER_STATUS" != "success" ]; then
-            echo "One or both upstream workflows did not succeed, aborting!"
-            exit 1
-          fi
-        env:
-          GH_TOKEN: ${{ github.token }}
-
   deploy:
     runs-on: ubuntu-24.04
-    needs: check-previous-workflows-status
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       id-token: write
       contents: read
