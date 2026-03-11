@@ -2,7 +2,7 @@
 
 A production-ready DevOps pipeline for a Node.js Express API, demonstrating containerization, infrastructure as code, CI/CD automation, blue-green deployments, and secure cloud provisioning on AWS.
 
-**Live:** https://nodeapp.lefrancis.org/
+**Live:** https://nodeapp.lefrancis.org
 
 ---
 
@@ -134,7 +134,7 @@ Common dependency installation steps (e.g. the [Task](https://taskfile.dev) runn
 
 ## Infrastructure
 
-Provisioned with **Terraform**, split across two environments. State is stored remotely in S3.
+Infrastructure is provisioned with **Terraform**, split across two environments, with the Terraform state stored remotely in S3.
 
 See [docs/architecture.md](docs/architecture.md) for a full breakdown.
 
@@ -142,7 +142,7 @@ See [docs/architecture.md](docs/architecture.md) for a full breakdown.
 
 #### `terraform/env/dns`
 
-Provisions Cloudflare DNS records to validate the ACM certificate. **Run once** during initial setup — not part of CI.
+Provisions Cloudflare DNS records to validate the ACM certificate. **Rab once** during initial setup and not part of CI.
 
 ```bash
 cd terraform/env/dns

@@ -70,7 +70,7 @@ All secrets are stored in **AWS Secrets Manager** and retrieved at runtime. Noth
 | DockerHub credentials | GitHub Actions build workflow | Fetched via OIDC-authenticated Secrets Manager call |
 | Cloudflare API token | Terraform DNS env | Passed as a Terraform variable (not stored in state) |
 
-GitHub Actions secrets (e.g. OIDC role ARN, target group ARNs) are stored as **GitHub encrypted secrets** and injected as environment variables — they are never printed in logs.
+GitHub Actions secrets (e.g. OIDC role ARN, target group ARNs) are stored as **GitHub encrypted secrets** and injected as environment variables (these variables are never printed in logs).
 
 ---
 

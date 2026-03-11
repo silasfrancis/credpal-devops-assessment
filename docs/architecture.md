@@ -112,7 +112,7 @@ The EC2 instance has no inbound rule for port 22. There is no bastion host. All 
 
 **Cloudflare** manages the domain. DNS records are provisioned by Terraform using the Cloudflare provider.
 
-**ACM** issues a certificate for the application domain. Certificate validation is DNS-based — Terraform creates the required CNAME records in Cloudflare automatically (via `terraform/env/dns`). Once validated and in `ISSUED` state, the certificate is attached to the ALB HTTPS listener.
+**ACM** issues a certificate for the application domain. Certificate validation is DNS-based and Terraform creates the required CNAME records in Cloudflare automatically (via `terraform/env/dns`). Once validated and in `ISSUED` state, the certificate is attached to the ALB HTTPS listener.
 
 ---
 
@@ -154,16 +154,16 @@ Developer opens PR
          │ on success (runs in parallel)
          ├─────────────────────┐
          ▼                     ▼
-┌────────────────┐   ┌──────────────────────┐
-│ Terraform      │   │ Deploy via SSM        │
-│ Apply          │   │  · Skips if no new    │
-│                │   │    image was built    │
-│ Detect and     │   │  · Detect active      │
-│ apply infra    │   │  · Start inactive     │
-│ changes        │   │  · Health check       │
-│                │   │  · Switch ALB TG      │
-│                │   │  · Drain + stop old   │
-└────────────────┘   └──────────────────────┘
+┌──────────────────────────┐   ┌──────────────────────────┐
+│ Terraform Apply          │   │ Deploy via SSM           │
+│                          │   │                          │
+│ Detect and apply         │   │ · Skip if no new image   │
+│ infrastructure changes   │   │ · Detect active env      │
+│                          │   │ · Start inactive env     │
+│                          │   │ · Health check           │
+│                          │   │ · Switch ALB target      │
+│                          │   │ · Drain + stop old       │
+└──────────────────────────┘   └──────────────────────────┘
 ```
 
 ---
