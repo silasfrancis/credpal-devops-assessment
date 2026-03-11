@@ -142,7 +142,7 @@ See [docs/architecture.md](docs/architecture.md) for a full breakdown.
 
 #### `terraform/env/dns`
 
-Provisions Cloudflare DNS records to validate the ACM certificate. **Rab once** during initial setup and not part of CI.
+Provisions Cloudflare DNS records to validate the ACM certificate. **Ran once** during initial setup and not part of CI.
 
 ```bash
 cd terraform/env/dns
@@ -168,7 +168,7 @@ Provisions: VPC (public/private subnets, Internet Gateway, NAT Gateway, Security
 
 ## Configuration Management
 
-**Ansible** bootstraps the EC2 instance over SSM (no SSH). It uses a `bootstrap` role to:
+**Ansible** bootstraps the EC2 instance over SSM. It uses a `bootstrap` role to:
 
 - Install Docker, Docker Compose, and AWS CLI
 - Create `/app` and copy `docker-compose.yaml` + `scripts/deploy.sh` into the instance
