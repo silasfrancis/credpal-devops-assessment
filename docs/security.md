@@ -19,7 +19,7 @@ This document covers the security decisions made across the application, infrast
 
 ### Visual Flow
 
-<img src="security-flow.png" alt="Security Flow" width="70%|">
+<img src="security-flow.png" alt="Security Flow" width="60%|">
 
 ### No Public Access to EC2
 
