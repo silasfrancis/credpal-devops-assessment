@@ -14,6 +14,8 @@ This document describes the infrastructure and traffic flow for the CredPal DevO
 
 ## Network Design
 
+<img src="network_design.png" alt="Network Design" width="110%|">
+
 ### VPC
 
 A dedicated VPC isolates all application resources. The address space is divided into public and private subnets across availability zones.
@@ -111,34 +113,7 @@ Terraform remote state is stored in a dedicated **S3 bucket** with versioning en
 
 ## Deployment Flow
 
-```
-Deployment Flow
-Developer opens PR
-       │
-       ▼
-┌─────────────────────┐
-│ Security Scan       │  SonarQube · Snyk · Checkov
-│ Unit Tests          │  Jest
-└────────┬────────────┘
-         │ PR merged to main
-         ▼
-┌─────────────────────┐
-│ Build               │  Docker build → Trivy scan → DockerHub push
-└────────┬────────────┘
-         │ on success (runs in parallel)
-         ├─────────────────────┐
-         ▼                     ▼
-┌──────────────────────────┐   ┌──────────────────────────┐
-│ Terraform Apply          │   │ Deploy via SSM           │
-│                          │   │                          │
-│ Detect and apply         │   │ · Skip if no new image   │
-│ infrastructure changes   │   │ · Detect active env      │
-│                          │   │ · Start inactive env     │
-│                          │   │ · Health check           │
-│                          │   │ · Switch ALB target      │
-│                          │   │ · Drain + stop old       │
-└──────────────────────────┘   └──────────────────────────┘
-```
+<img src="deployment_flow.png" alt="Deployment Flow" width="80%|">
 
 ---
 
