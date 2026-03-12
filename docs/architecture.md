@@ -113,7 +113,9 @@ Terraform remote state is stored in a dedicated **S3 bucket** with versioning en
 
 ## Deployment Flow
 
-<img src="deployment_flow.png" alt="Deployment Flow" width="40%|">
+<div style="margin-left: 10%;">
+  <img src="deployment_flow.png" alt="Deployment Flow" width="40%">
+</div>
 
 ---
 
