@@ -8,7 +8,7 @@ This document describes the infrastructure and traffic flow for the CredPal DevO
 
 ## High-Level Architecture
 
-<img src="architecture.png" alt="Architecture Diagram" width="80%|">
+<img src="architecture.png" alt="Architecture Diagram" width="90%|">
 
 ---
 
