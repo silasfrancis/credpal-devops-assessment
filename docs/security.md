@@ -17,6 +17,10 @@ This document covers the security decisions made across the application, infrast
 
 ## Network Security
 
+### Visual Flow
+
+<img src="security-flow.png" alt="Security Flow" width="60%|">
+
 ### No Public Access to EC2
 
 The EC2 instance runs in a **private subnet** with no inbound rules for port 22. There is no jump host and no public IP assigned to the instance. The only inbound traffic allowed is from the **ALB security group** on ports 3000 and 3001.
