@@ -9,31 +9,7 @@ This document describes the infrastructure and traffic flow for the CredPal DevO
 ## High-Level Architecture
 
 ```
-Internet
-   │
-   ▼
-┌──────────────────────────────┐
-│  Cloudflare DNS              │  DNS routing + ACM certificate validation
-└────────────┬─────────────────┘
-             │ HTTPS (443)
-             ▼
-┌──────────────────────────────┐
-│  Application Load Balancer   │  Public subnets · HTTP→HTTPS redirect
-│  (ALB)                       │  HTTPS listener forwards to active Target Group
-└────────────┬─────────────────┘
-             │ Port 3000 or 3001
-             ▼
-┌──────────────────────────────┐
-│  EC2 Instance                │  Private subnet · No inbound SSH
-│  ├── app_blue  (:3000)       │  Receives traffic from ALB SG only
-│  ├── app_green (:3001)       │
-│  └── postgres  (:5432)       │
-└──────────────────────────────┘
-             │
-             ▼
-┌──────────────────────────────┐
-│  AWS Systems Manager (SSM)   │  CI/CD access path · No port 22
-└──────────────────────────────┘
+[![Architecture Diagram](architecture.png)](architecture.png)
 ```
 
 ---
@@ -190,4 +166,4 @@ Developer opens PR
 ## Related Documentation
 
 - [← Back to README](../README.md)
-- [security.md→](security.md)
+- [security.md →](security.md)
