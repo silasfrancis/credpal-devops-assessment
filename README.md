@@ -1,9 +1,6 @@
 # CredPal DevOps Assessment
 
 A production-ready DevOps pipeline for a Node.js Express API, demonstrating containerization, infrastructure as code, CI/CD automation, blue-green deployments, and secure cloud provisioning on AWS.
-
-**Live:** https://nodeapp.lefrancis.org
-
 ---
 
 ## Table of Contents
